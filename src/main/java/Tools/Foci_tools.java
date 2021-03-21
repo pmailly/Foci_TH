@@ -73,8 +73,8 @@ public class Foci_tools {
     private static double maxVolDAPI = 1000;   // max volume for nucleus in C0
     public static double minVolFoci = 0.01;    // max volume for foci in C2 (microns^3)
     public static double maxVolFoci = 5;    // max volume for foci in C2 (microns^3)
-    public static double DOGmin = 4;
-    public static double DOGmax = 8;
+    public static double DOGmin = 1;
+    public static double DOGmax = 4;
     public static String thMet = "MaxEntropy";
     private static String [] methods = new AutoThresholder().getMethods();
     public static Boolean touch = false;
