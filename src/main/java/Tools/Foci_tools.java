@@ -76,7 +76,7 @@ public class Foci_tools {
     public static double maxVolFoci = 10;    // max volume for foci in C2 (microns^3)
     public static double DOGmin = 1;
     public static double DOGmax = 4;
-    public static String thMet = "MaxEntropy";
+    public static String thMet = "Moments";
     private static String [] methods = new AutoThresholder().getMethods();
     public static Boolean touch = false;
     
@@ -267,8 +267,9 @@ public static boolean dialogBox() {
      * @return 
      */
 
-    public static int findFociInNucleus(Objects3DPopulation fociPop, Objects3DPopulation fociDapiPop, Objects3DPopulation nucleusPop, ArrayList<Nucleus> nucleus, ImagePlus img) {
+    public static int[] findFociInNucleus(Objects3DPopulation fociPop, Objects3DPopulation fociDapiPop, Objects3DPopulation nucleusPop, ArrayList<Nucleus> nucleus, ImagePlus img) {
         IJ.showStatus("Finding foci in nucleus ...");
+        int fociDapiInNuc  = 0; 
         int fociInNuc  = 0; 
         ImageHandler imgHFoci = ImageHandler.wrap(img);
         
@@ -277,7 +278,6 @@ public static boolean dialogBox() {
             int fociNb = 0, fociDapiNb = 0;
             double fociInt = 0;
             double fociVol = 0, fociDapiVol = 0;
-            boolean hasFoci = false;
             Object3D nucObj = nucleusPop.getObject(i);
             // find foci in nucleus
             for (int j = 0; j < fociPop.getNbObjects(); j++) {
@@ -299,12 +299,13 @@ public static boolean dialogBox() {
                     // draw foci with zero for diffuse
                     fociObj.draw(imgHFoci, 0);
                     fociPop.removeObject(fociObj);
-                    hasFoci = true;
                 }   
             }
-            Nucleus nuc = new Nucleus(i,nucObj.getVolumeUnit(),0,0,fociNb,fociVol,fociInt,nucObj.getIntegratedDensity(imgHFoci),hasFoci);
-            nucleus.add(nuc);
-            
+            nucleus.get(i).setNucVol(nucObj.getVolumeUnit());
+            nucleus.get(i).setFociNb(fociNb);
+            nucleus.get(i).setFociVol(fociVol);
+            nucleus.get(i).setFociInt(fociInt);
+            nucleus.get(i).setDiffuseInt(nucObj.getIntegratedDensity(imgHFoci));
             // Find foci Dapi in nucleus
             for (int k = 0; k < fociDapiPop.getNbObjects(); k++) {
                 IJ.showStatus("Finding foci Dapi in nucleus "+i+"/"+nucleusPop.getNbObjects());
@@ -318,6 +319,7 @@ public static boolean dialogBox() {
                         findFoci = true;
                 } 
                 if (findFoci) {
+                    fociDapiInNuc++;
                     fociDapiNb++; 
                     fociDapiVol += fociObj.getVolumeUnit();
                     fociDapiPop.removeObject(fociObj);
@@ -327,7 +329,8 @@ public static boolean dialogBox() {
             nucleus.get(i).setFociDapiVol(fociDapiVol);
         }
         imgHFoci.closeImagePlus();
-        return(fociInNuc);
+        int[] focis = {fociInNuc, fociDapiInNuc};
+        return(focis);
     }
 
     /**
@@ -338,18 +341,23 @@ public static boolean dialogBox() {
      * @return
      */
   
-    public static Objects3DPopulation thNucleus (Objects3DPopulation nucleusPop, ArrayList<Point3D> ptList) {       
+    public static Objects3DPopulation thNucleus (Objects3DPopulation nucleusPop, ArrayList<Point3D> ptList, ArrayList<Nucleus> nucleus) {       
         Objects3DPopulation thCellPop = new Objects3DPopulation();
-        for (int i = 0; i < ptList.size(); i++) {
-            Point3D pt = ptList.get(i);
-            for (int n = 0; n < nucleusPop.getNbObjects(); n++) {
-                Object3D objNuc = nucleusPop.getObject(n);
+        
+        for (int n = 0; n < nucleusPop.getNbObjects(); n++) {
+            Nucleus nuc = new Nucleus(n,0,0,0,0,0,0,0,false);
+            nucleus.add(nuc);
+            Object3D objNuc = nucleusPop.getObject(n);
+            for (int i = 0; i < ptList.size(); i++) {
+                Point3D pt = ptList.get(i);
                 if (objNuc.inside(pt)) {
                     thCellPop.addObject(objNuc);
+                    nucleus.get(n).setTh(true);
                     break;
                 }
                 else if (objNuc.distPixelBorderUnit(pt.x, pt.y, pt.z) <= maxDistPt) {
-                    thCellPop.addObject(objNuc);                    
+                    thCellPop.addObject(objNuc);  
+                    nucleus.get(n).setTh(true);
                     break;
                 }
             }

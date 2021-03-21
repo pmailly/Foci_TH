@@ -73,10 +73,9 @@ public static Calibration cal = new Calibration();
 
 boolean spining = false;
 // Default Z step
-private final double zStep = 0.3;  
 public String xmlFile = "";
 private double minVolDapiFoci = 0.01;    // max volume for foci Dapi (pixels^3)
-private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
+private double maxVolDapiFoci = 10;    // max volume for foci Dapi (pixels^3)
 
 
     /**
@@ -159,7 +158,7 @@ private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
             /*
             * find DAPI foci population in channel 0
             */
-            Objects3DPopulation fociDapiPop = new Objects3DPopulation(findDots(imgC0, 1, 4, "Moment", outDirResults+rootName+"_FociDapi.tif").getObjectsWithinVolume(minVolDapiFoci, maxVolDapiFoci, true));
+            Objects3DPopulation fociDapiPop = new Objects3DPopulation(findDots(imgC0, 1, 4, "Moments", outDirResults+rootName+"_FociDapi.tif").getObjectsWithinVolume(minVolDapiFoci, maxVolDapiFoci, true));
 
             System.out.println("DAPI foci "+channels.get(0)+" = " + fociDapiPop.getNbObjects());
 
@@ -167,20 +166,17 @@ private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
             /*
             * Find nucleus in C0
             */ 
-            ImagePlus imgC0Org = imgC0.duplicate();
 
-            Objects3DPopulation nucleusPop = findnucleus2(imgC0Org, outDirResults+rootName, touch);
+            Objects3DPopulation nucleusPop = findnucleus2(imgC0, outDirResults+rootName, touch);
             System.out.println("Image : " +imgC0.getTitle());
             System.out.println("DAPI nucleus "+channels.get(0)+" = " + nucleusPop.getNbObjects());
             
-            
+            ArrayList<Nucleus> nucleus = new ArrayList<>();
             // find th nucleus population
-            Objects3DPopulation ThCellPop = thNucleus(nucleusPop, ptList);
+            Objects3DPopulation ThCellPop = thNucleus(nucleusPop, ptList, nucleus);
             System.out.println("TH cell = " + ThCellPop.getNbObjects());
-            
-            
+
             closeImages(imgC0);
-            closeImages(imgC0Org);
 
             /*
             * Open Channel 2 (Foci)
@@ -188,25 +184,23 @@ private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
             options.setCBegin(series, 2);
             options.setCEnd(series, 2);
             ImagePlus imgC2 = BF.openImagePlus(options)[0];
-            ImagePlus imgC2Org = imgC2.duplicate();
-
+            
             /*
             * find foci population in channel 2
             */
  
             Objects3DPopulation fociPop = new Objects3DPopulation(findDots(imgC2, (int)DOGmin, (int)DOGmax, thMet, outDirResults+rootName+"_Foci.tif").getObjectsWithinVolume(minVolFoci, maxVolFoci, true));
-            System.out.println("foci "+channels.get(2)+" = " + fociPop.getNbObjects());
-            closeImages(imgC2);
-            
+            System.out.println("foci "+channels.get(2)+" = " + fociPop.getNbObjects());            
 
             /*
             * find foci population nucleus
             * compute parameters
             */
-            ArrayList<Nucleus> nucleus = new ArrayList<>();
-            int fociInNuc = findFociInNucleus(fociPop, fociDapiPop, nucleusPop, nucleus, imgC2Org);
-            System.out.println("foci "+channels.get(2)+" in nucleus = " + fociInNuc);
-            closeImages(imgC2Org);
+            
+            int[] fociInNuc = findFociInNucleus(fociPop, fociDapiPop, nucleusPop, nucleus, imgC2);
+            System.out.println("foci "+channels.get(2)+" in nucleus = " + fociInNuc[0]);
+            System.out.println("foci Dapi"+channels.get(0)+" in nucleus = " + fociInNuc[1]);
+            closeImages(imgC2);
             
             /*
             Write parameters
@@ -217,6 +211,7 @@ private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
                         nuc.getFociInt()+"\t"+nuc.getDiffuseInt()+"\t"+nuc.getTh()+"\n");
                 outputAnalyze.flush();
             }
+            
             
             /*
             * Save images object
