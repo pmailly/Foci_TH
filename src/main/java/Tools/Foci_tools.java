@@ -18,6 +18,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
 import ij.plugin.GaussianBlur3D;
@@ -72,14 +73,14 @@ public class Foci_tools {
     private static double minVolDAPI = 20;    // max volume for nucleus in C0
     private static double maxVolDAPI = 1000;   // max volume for nucleus in C0
     public static double minVolFoci = 0.01;    // max volume for foci in C2 (microns^3)
-    public static double maxVolFoci = 5;    // max volume for foci in C2 (microns^3)
+    public static double maxVolFoci = 10;    // max volume for foci in C2 (microns^3)
     public static double DOGmin = 1;
     public static double DOGmax = 4;
     public static String thMet = "MaxEntropy";
     private static String [] methods = new AutoThresholder().getMethods();
     public static Boolean touch = false;
     
-    public static CLIJ2 clij2 = CLIJ2.getInstance();
+    private static final CLIJ2 clij2 = CLIJ2.getInstance();
     
     /**
      * Find images with extension in folder
@@ -214,13 +215,16 @@ public static boolean dialogBox() {
     public static Objects3DPopulation findDots(ImagePlus imgCh, int sig1, int sig2, String th, String name) {
         ClearCLBuffer imgCL = clij2.push(imgCh);
         ClearCLBuffer imgCLDOG = DOG(imgCL, sig1, sig1, sig2, sig2);
-        ClearCLBuffer imgCLBin = threshold(imgCLDOG, thMet, false);
+        clij2.release(imgCL);
+        ClearCLBuffer imgCLBin = threshold(imgCLDOG, th, false);
+        clij2.release(imgCLDOG);
         ImagePlus img = clij2.pull(imgCLBin);
+        clij2.release(imgCLBin);
         img.setCalibration(imgCh.getCalibration());
         Objects3DPopulation objPop = getPopFromImage(img);
         FileSaver fociMaskFile = new FileSaver(img);
         fociMaskFile.saveAsTiff(name);
-        clij2.release(imgCLBin);
+        closeImages(img);
         return(objPop);
     } 
     
@@ -423,51 +427,6 @@ public static boolean dialogBox() {
         }
         return(ptList);
     }
-    
-     /**
-    * 3D watershed
-    * @param imgBinmask
-    * @param rad
-    * @return distance map image
-    */
-    public static ImagePlus watershedSplit(ImagePlus imgBinmask, int rad) {
-        int nbCpus = ThreadUtil.getNbCpus();
-        float resXY = 1;
-        float resZ = 1;
-        float radXY = rad;
-        float radZ = rad;
-        Calibration cal = imgBinmask.getCalibration();
-        if (cal != null) {
-            resXY = (float) cal.pixelWidth;
-            resZ = (float) cal.pixelDepth;
-            radZ = radXY * (resXY / resZ);
-        }
-        IJ.showStatus("Computing EDT");
-        ImageInt imgMask = ImageInt.wrap(imgBinmask);
-        ImageFloat edt = EDT.run(imgMask, 1, resXY, resZ, false, nbCpus);
-        ImageHandler edt16 = edt.convertToShort(true);
-        ImagePlus edt16Plus = edt16.getImagePlus();
-        GaussianBlur3D.blur(edt16Plus, 6.0, 6.0, 6.0);
-        edt16 = ImageInt.wrap(edt16Plus);
-        edt16.intersectMask(imgMask);
-        // seeds
-        ImageHandler seedsImg;
-        seedsImg = FastFilters3D.filterImage(edt16, FastFilters3D.MAXLOCAL, radXY, radXY, radZ, 0, false);
-        IJ.showStatus("Computing watershed");
-        Watershed3D water = new Watershed3D(edt16, seedsImg, 10, 1);
-        ImagePlus imp = water.getWatershedImage3D().getImagePlus();
-        WindowManager.getWindow("Log").dispose();
-        IJ.setThreshold(imp, 1, 65535);
-        Prefs.blackBackground = false;
-        IJ.run(imp, "Convert to Mask", "method=Default background=Dark");
-        closeImages(imgMask.getImagePlus());
-        closeImages(edt.getImagePlus());
-        closeImages(edt16.getImagePlus());
-        closeImages(edt16Plus);
-        closeImages(seedsImg.getImagePlus());
-        return(imp);
-    }
-    
     
     
     /* Median filter 
