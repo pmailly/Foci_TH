@@ -160,8 +160,6 @@ private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
             * find DAPI foci population in channel 0
             */
             Objects3DPopulation fociDapiPop = new Objects3DPopulation(findDots(imgC0, 1, 4, "Moment", outDirResults+rootName+"_FociDapi.tif").getObjectsWithinVolume(minVolDapiFoci, maxVolDapiFoci, true));
-            //FileSaver dapiFociMaskFile = new FileSaver(imgC0);
-            //dapiFociMaskFile.saveAsTiff(outDirResults+rootName+"_NucleusFociDapiMask.tif");
 
             System.out.println("DAPI foci "+channels.get(0)+" = " + fociDapiPop.getNbObjects());
 
@@ -206,8 +204,8 @@ private double maxVolDapiFoci = 5;    // max volume for foci Dapi (pixels^3)
             * compute parameters
             */
             ArrayList<Nucleus> nucleus = new ArrayList<>();
-            Objects3DPopulation fociInNucPop = findFociInNucleus(fociPop, fociDapiPop, nucleusPop, nucleus, imgC2Org);
-            System.out.println("foci "+channels.get(2)+" in nucleus = " + fociInNucPop.getNbObjects());
+            int fociInNuc = findFociInNucleus(fociPop, fociDapiPop, nucleusPop, nucleus, imgC2Org);
+            System.out.println("foci "+channels.get(2)+" in nucleus = " + fociInNuc);
             closeImages(imgC2Org);
             
             /*

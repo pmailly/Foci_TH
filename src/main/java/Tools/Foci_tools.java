@@ -263,9 +263,9 @@ public static boolean dialogBox() {
      * @return 
      */
 
-    public static Objects3DPopulation findFociInNucleus(Objects3DPopulation fociPop, Objects3DPopulation fociDapiPop, Objects3DPopulation nucleusPop, ArrayList<Nucleus> nucleus, ImagePlus img) {
+    public static int findFociInNucleus(Objects3DPopulation fociPop, Objects3DPopulation fociDapiPop, Objects3DPopulation nucleusPop, ArrayList<Nucleus> nucleus, ImagePlus img) {
         IJ.showStatus("Finding foci in nucleus ...");
-        Objects3DPopulation fociInNuc  = new Objects3DPopulation(); 
+        int fociInNuc  = 0; 
         ImageHandler imgHFoci = ImageHandler.wrap(img);
         
         for (int i = 0; i < nucleusPop.getNbObjects(); i++) {
@@ -288,7 +288,7 @@ public static boolean dialogBox() {
                         findFoci = true;
                 }    
                 if (findFoci) {
-                    fociInNuc.addObject(fociObj);
+                    fociInNuc++;
                     fociNb++; 
                     fociInt += fociObj.getIntegratedDensity(imgHFoci);
                     fociVol += fociObj.getVolumeUnit();
