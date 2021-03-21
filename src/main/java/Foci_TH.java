@@ -109,6 +109,11 @@ private double maxVolDapiFoci = 10;    // max volume for foci Dapi (pixels^3)
         outputAnalyze.write("image Name\t#Nucleus\tFoci Dapi nb\tFoci Dapi Vol\tFoci nb\tFoci Vol\tFoci Int\tDiffuse Int\tTH cell\n");
         outputAnalyze.flush();
         
+        // write results headers
+        fwAnalyze = new FileWriter(outDirResults + "results_Global.xls",false);
+        BufferedWriter outputGlobalAnalyze = new BufferedWriter(fwAnalyze);
+        outputGlobalAnalyze.write("image Name\tNucleus\tTh Nucleus\tFoci Dapi\tFoci Dapi in nucleus\tFoci Dapi in Th nucleus\tFoci\tFoci in nucleus\tFoci in Th nucleus\n");
+        outputGlobalAnalyze.flush();
         
         // create OME-XML metadata store of the latest schema version
         ServiceFactory factory;
@@ -159,8 +164,8 @@ private double maxVolDapiFoci = 10;    // max volume for foci Dapi (pixels^3)
             * find DAPI foci population in channel 0
             */
             Objects3DPopulation fociDapiPop = new Objects3DPopulation(findDots(imgC0, 1, 4, "Moments", outDirResults+rootName+"_FociDapi.tif").getObjectsWithinVolume(minVolDapiFoci, maxVolDapiFoci, true));
-
-            System.out.println("DAPI foci "+channels.get(0)+" = " + fociDapiPop.getNbObjects());
+            int totalFociDapi = fociDapiPop.getNbObjects();
+            System.out.println("DAPI foci "+channels.get(0)+" = " + totalFociDapi);
 
 
             /*
@@ -190,7 +195,8 @@ private double maxVolDapiFoci = 10;    // max volume for foci Dapi (pixels^3)
             */
  
             Objects3DPopulation fociPop = new Objects3DPopulation(findDots(imgC2, (int)DOGmin, (int)DOGmax, thMet, outDirResults+rootName+"_Foci.tif").getObjectsWithinVolume(minVolFoci, maxVolFoci, true));
-            System.out.println("foci "+channels.get(2)+" = " + fociPop.getNbObjects());            
+            int totalFoci = fociPop.getNbObjects();
+            System.out.println("foci "+channels.get(2)+" = " + totalFoci);            
 
             /*
             * find foci population nucleus
@@ -205,14 +211,21 @@ private double maxVolDapiFoci = 10;    // max volume for foci Dapi (pixels^3)
             /*
             Write parameters
             */
-            
+            int fociInThNucleus = 0, fociDapiInThNucleus = 0;
             for (Nucleus nuc : nucleus) {
                 outputAnalyze.write(rootName+"\t"+nuc.getIndex()+"\t"+nuc.getFociDapiNb()+"\t"+nuc.getFociDapiVol()+"\t"+nuc.getFociNb()+"\t"+nuc.getFociVol()+"\t"+
                         nuc.getFociInt()+"\t"+nuc.getDiffuseInt()+"\t"+nuc.getTh()+"\n");
                 outputAnalyze.flush();
+                if (nuc.getTh()) {
+                    fociInThNucleus += +nuc.getFociNb();
+                    fociDapiInThNucleus += nuc.getFociDapiNb();
+                }
             }
+
+            outputGlobalAnalyze.write(rootName+"\t"+nucleus.size()+"\t"+ThCellPop.getNbObjects()+"\t"+totalFociDapi+"\t"+fociInNuc[1]+"\t"+fociDapiInThNucleus+"\t"+
+                    totalFoci+"\t"+fociInNuc[0]+"\t"+fociInThNucleus+"\n");
             
-            
+            outputGlobalAnalyze.flush();
             /*
             * Save images object
             * 
@@ -284,6 +297,7 @@ private double maxVolDapiFoci = 10;    // max volume for foci Dapi (pixels^3)
             closeImages(imgC1);
         }
         outputAnalyze.close();
+        outputGlobalAnalyze.close();
         } catch (DependencyException | FormatException | IOException | ServiceException | ParserConfigurationException | SAXException ex) {
             Logger.getLogger(Foci_TH.class.getName()).log(Level.SEVERE, null, ex);
         }
