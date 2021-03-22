@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Tools;
+package Foci_Tools;
 
 /**
  *
@@ -272,6 +272,10 @@ public static boolean dialogBox() {
         int fociDapiInNuc  = 0; 
         int fociInNuc  = 0; 
         ImageHandler imgHFoci = ImageHandler.wrap(img);
+        Objects3DPopulation fociPopDup = new Objects3DPopulation();
+        fociPopDup.addObjects(fociPop.getObjectsList());
+        Objects3DPopulation fociDapiPopDup = new Objects3DPopulation();
+        fociDapiPopDup.addObjects(fociDapiPop.getObjectsList());
         
         for (int i = 0; i < nucleusPop.getNbObjects(); i++) {
             IJ.showStatus("Finding foci in nucleus "+i+"/"+nucleusPop.getNbObjects());
@@ -280,9 +284,9 @@ public static boolean dialogBox() {
             double fociVol = 0, fociDapiVol = 0;
             Object3D nucObj = nucleusPop.getObject(i);
             // find foci in nucleus
-            for (int j = 0; j < fociPop.getNbObjects(); j++) {
+            for (int j = 0; j < fociPopDup.getNbObjects(); j++) {
                 boolean findFoci = false;
-                Object3D fociObj = fociPop.getObject(j);
+                Object3D fociObj = fociPopDup.getObject(j);
                 // find if dot is inside nucleus or dist <= distMin
                 if (fociObj.hasOneVoxelColoc(nucObj))
                     findFoci = true;
@@ -298,7 +302,7 @@ public static boolean dialogBox() {
                     fociVol += fociObj.getVolumeUnit();
                     // draw foci with zero for diffuse
                     fociObj.draw(imgHFoci, 0);
-                    fociPop.removeObject(fociObj);
+                    fociPopDup.removeObject(fociObj);
                 }   
             }
             nucleus.get(i).setNucVol(nucObj.getVolumeUnit());
@@ -307,9 +311,9 @@ public static boolean dialogBox() {
             nucleus.get(i).setFociInt(fociInt);
             nucleus.get(i).setDiffuseInt(nucObj.getIntegratedDensity(imgHFoci));
             // Find foci Dapi in nucleus
-            for (int k = 0; k < fociDapiPop.getNbObjects(); k++) {
+            for (int k = 0; k < fociDapiPopDup.getNbObjects(); k++) {
                 IJ.showStatus("Finding foci Dapi in nucleus "+i+"/"+nucleusPop.getNbObjects());
-                Object3D fociObj = fociDapiPop.getObject(k);
+                Object3D fociObj = fociDapiPopDup.getObject(k);
                 boolean findFoci = false;
                 if (fociObj.hasOneVoxelColoc(nucObj))
                     findFoci = true;
@@ -322,7 +326,7 @@ public static boolean dialogBox() {
                     fociDapiInNuc++;
                     fociDapiNb++; 
                     fociDapiVol += fociObj.getVolumeUnit();
-                    fociDapiPop.removeObject(fociObj);
+                    fociDapiPopDup.removeObject(fociObj);
                 }
             }
             nucleus.get(i).setFociDapiNb(fociDapiNb);

@@ -9,24 +9,24 @@
 
 
 
-import static Tools.Foci_tools.DOGmax;
-import static Tools.Foci_tools.DOGmin;
-import static Tools.Foci_tools.closeImages;
-import static Tools.Foci_tools.dialogBox;
-import static Tools.Foci_tools.findChannels;
-import static Tools.Foci_tools.findDots;
-import static Tools.Foci_tools.findFociInNucleus;
-import static Tools.Foci_tools.findImageCalib;
-import static Tools.Foci_tools.findImages;
-import static Tools.Foci_tools.findnucleus2;
-import static Tools.Foci_tools.labelsObject;
-import static Tools.Foci_tools.maxVolFoci;
-import static Tools.Foci_tools.minVolFoci;
-import static Tools.Foci_tools.readXML;
-import static Tools.Foci_tools.thMet;
-import static Tools.Foci_tools.thNucleus;
-import static Tools.Foci_tools.touch;
-import Tools.Nucleus;
+import static Foci_Tools.Foci_tools.DOGmax;
+import static Foci_Tools.Foci_tools.DOGmin;
+import static Foci_Tools.Foci_tools.closeImages;
+import static Foci_Tools.Foci_tools.dialogBox;
+import static Foci_Tools.Foci_tools.findChannels;
+import static Foci_Tools.Foci_tools.findDots;
+import static Foci_Tools.Foci_tools.findFociInNucleus;
+import static Foci_Tools.Foci_tools.findImageCalib;
+import static Foci_Tools.Foci_tools.findImages;
+import static Foci_Tools.Foci_tools.findnucleus2;
+import static Foci_Tools.Foci_tools.labelsObject;
+import static Foci_Tools.Foci_tools.maxVolFoci;
+import static Foci_Tools.Foci_tools.minVolFoci;
+import static Foci_Tools.Foci_tools.readXML;
+import static Foci_Tools.Foci_tools.thMet;
+import static Foci_Tools.Foci_tools.thNucleus;
+import static Foci_Tools.Foci_tools.touch;
+import Foci_Tools.Nucleus;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.io.FileSaver;
