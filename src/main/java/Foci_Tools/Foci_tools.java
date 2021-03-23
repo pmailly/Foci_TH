@@ -68,11 +68,11 @@ import org.apache.commons.io.FilenameUtils;
 public class Foci_tools {  
     
     
-    private static double maxDistDot = 1;  // min distance nucleus border to dots
+    private static double maxDistDot = 2;  // min distance nucleus border to dots
     private static double maxDistPt = 5;  // min distance nucleus border to nucleus markers
-    private static double minVolDAPI = 20;    // max volume for nucleus in C0
-    private static double maxVolDAPI = 1000;   // max volume for nucleus in C0
-    public static double minVolFoci = 0.01;    // max volume for foci in C2 (microns^3)
+    private static double minVolDAPI = 5;    // max volume for nucleus in C0
+    private static double maxVolDAPI = 20;   // max volume for nucleus in C0
+    public static double minVolFoci = 0.1;    // max volume for foci in C2 (microns^3)
     public static double maxVolFoci = 10;    // max volume for foci in C2 (microns^3)
     public static double DOGmin = 1;
     public static double DOGmax = 4;
