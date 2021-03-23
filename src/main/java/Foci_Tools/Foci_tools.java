@@ -72,7 +72,7 @@ public class Foci_tools {
     private static double maxDistPt = 5;  // min distance nucleus border to nucleus markers
     private static double minVolDAPI = 50;    // max volume for nucleus in C0
     private static double maxVolDAPI = 1000;   // max volume for nucleus in C0
-    public static double minVolFoci = 0.1;    // max volume for foci in C2 (microns^3)
+    public static double minVolFoci = 0.05;    // max volume for foci in C2 (microns^3)
     public static double maxVolFoci = 10;    // max volume for foci in C2 (microns^3)
     public static double DOGmin = 1;
     public static double DOGmax = 4;
